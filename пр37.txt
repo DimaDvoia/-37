@@ -1,0 +1,44 @@
+from kivy.app import App
+from kivy.uix.widget import Widget
+from kivy.uix.button import Button
+from kivy.uix.colorpicker import ColorPicker
+from kivy.graphics import Line, Color
+
+class DrawingWidget(Widget):
+    def __init__(self, **kwargs):
+        super(DrawingWidget, self).__init__(**kwargs)
+        self.color_picker = ColorPicker()
+        self.color_picker.bind(color=self.set_color)
+        self.color = (1, 0, 0, 1)  # Default color is red
+        self.line_width = 2
+
+    def on_touch_down(self, touch):
+        with self.canvas:
+            Color(*self.color)
+            touch.ud['line'] = Line(points=(touch.x, touch.y), width=self.line_width)
+
+    def on_touch_move(self, touch):
+        touch.ud['line'].points += [touch.x, touch.y]
+
+    def set_color(self, instance, color):
+        self.color = color
+
+    def clear_canvas(self):
+        self.canvas.clear()
+
+class DrawingApp(App):
+    def build(self):
+        root = Widget()
+        drawing_widget = DrawingWidget()
+        clear_button = Button(text='Clear')
+        clear_button.bind(on_press=drawing_widget.clear_canvas)
+        color_picker = drawing_widget.color_picker
+
+        root.add_widget(drawing_widget)
+        root.add_widget(clear_button)
+        root.add_widget(color_picker)
+
+        return root
+
+if __name__ == '__main__':
+    DrawingApp().run()
